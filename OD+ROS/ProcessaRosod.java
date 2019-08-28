@@ -4,10 +4,13 @@
  * and open the template in the editor.
  */
 
+import conexao.MysqlDB;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -119,9 +122,9 @@ public class ProcessaRosod extends HttpServlet  {
                 System.out.println("fname: " + fieldname + " fvalue: " + fieldvalue);
             } else {
                 // Process form file field (input type="file").
-                String fieldname = item.getFieldName();
-                        //////////////MUDAR DIRETÓRIO//////////////
-                String filePath = "/home/claudio/Missions/" + id_user + "/";    
+                String fieldname = item.getFieldName();     
+                String userHome = System.getProperty("user.home");
+                String filePath = userHome + "/Missions/" + id_user + "/";    
                 File filePathTemp = new File(filePath);
                 if (!filePathTemp.exists()) {
                     filePathTemp.mkdir();
@@ -133,9 +136,11 @@ public class ProcessaRosod extends HttpServlet  {
                 File arquivoWP = new File(filePath+fieldname);
                 System.out.println("Filepath: " + filePath + fieldname);
                 caminho = filePath + fieldname;
+                String fileName = fieldname;
                 Rosod conexao = new Rosod(porta);
                 if(tipoRequisicao.equals("simulado")){
                     conexao.carregaMissaoSimulado(caminho);
+                    uploadMissaoRosod(id_user, caminho, fileName);
                 }else{
                     conexao.carregaMissao(caminho);
                 }
@@ -172,6 +177,9 @@ public class ProcessaRosod extends HttpServlet  {
                 case "arm_rosod":
                     controleRosodSimulado(id_user, type_request, conexaoRosod, response);
                 break;
+                case "disarm_rosod":
+                    //controleRosodSimulado(id_user, type_request, conexaoRosod, response);
+                break;
                 case "takeoff_rosod":
                     controleRosodSimulado(id_user, type_request, conexaoRosod, response);
                 break;
@@ -183,6 +191,9 @@ public class ProcessaRosod extends HttpServlet  {
                 break;
                 case "loiter_rosod":
                     controleRosodSimulado(id_user, type_request, conexaoRosod, response);
+                break;
+                case "nova_rota":
+                    gerarNovaRotaSimulado(id_user, type_request, conexaoRosod, response);
                 break;
                 case "desconecta_rosod":
                     desconectaRosod(id_user, conexaoRosod, response);
@@ -204,6 +215,9 @@ public class ProcessaRosod extends HttpServlet  {
                  case "arm_rosod":
                     controleRosod(id_user, type_request, conexaoRosod, response);
                 break;
+                 case "disarm_rosod":
+                    //controleRosod(id_user, type_request, conexaoRosod, response);
+                break;
                 case "takeoff_rosod":
                     controleRosod(id_user, type_request, conexaoRosod, response);
                 break;
@@ -215,6 +229,9 @@ public class ProcessaRosod extends HttpServlet  {
                 break;
                 case "loiter_rosod":
                     controleRosod(id_user, type_request, conexaoRosod, response);
+                break;
+                case "nova_rota":
+                    gerarNovaRota(id_user, type_request, conexaoRosod, response);
                 break;
                 case "desconecta_rosod":
                     desconectaRosod(id_user, conexaoRosod, response);
@@ -230,15 +247,48 @@ public class ProcessaRosod extends HttpServlet  {
             System.out.println("Deu null????");
     }
 }
+    //=============== Métodos Gerais =====================//
     
+    private void uploadMissaoRosod(int id_user,String caminho, String filename) throws SQLException{
+        //Limpa pasta temporaria 
+        String ABSOLUTE_PATH_MISSAO = System.getProperty("user.home") + "/tempOD/"+id_user+"/";
+        File f = new File(ABSOLUTE_PATH_MISSAO);
+        if(f.exists()){
+            limpaPastaTemp(f);
+        }
+            
+        boolean statusCadMissao = false;
+        MysqlDB banco = new MysqlDB();               
+        banco.connect();
+        PreparedStatement ps = null;
+        String sql = null;
+        System.out.println("Aqui chegou");                 
+        try {     
+           sql = "INSERT INTO missions(user_id_user, mission_name, mission_point)"
+                    + "VALUES(?,?,?);";   
+            System.out.println("Chegou aqui tbm");
+            ps = banco.conn.prepareStatement(sql);
+     
+            ps.setInt(1, id_user);
+            ps.setString(2, filename);
+            ps.setString(3, "missionPoint");
+            System.out.println("Instrução Sql: => " + ps.toString());
+            
+            ps.executeUpdate();
+            ps.close();  
+          
+            statusCadMissao = true;
+        }catch(SQLException e){
+            System.out.println("Exception is ;"+e);
+        }
+        
+        System.out.println("Cadastrou? " + statusCadMissao);     
+    }
+
     //=============== Métodos para voos simulados ===============//
     private void conectaRosodSimulado(int id_user, Rosod conexao, HttpServletResponse response) throws IOException, InterruptedException{
         //Conexao real também
         conexao.conectaDroneSimulado();  
-    }   
-    
-    private void uploadMissaoRosodSimulado(int id_user, String caminho, Rosod conexao, HttpServletResponse response) throws IOException{
-        conexao.carregaMissaoSimulado(caminho);
     }
     
     private void iniciaMissaoRosodSimulado(int id_user, Rosod conexao, HttpServletResponse response) throws IOException, InterruptedException{
@@ -249,6 +299,10 @@ public class ProcessaRosod extends HttpServlet  {
         conexao.controleDroneSimulado(request);
     }
     
+    private void gerarNovaRotaSimulado(int id_user, String request, Rosod conexao, HttpServletResponse response) throws IOException, InterruptedException{
+        conexao.novaRotaSimulado();
+    }
+    
     private void desconectaRosodSimulado(int id_user, Rosod conexao, HttpServletResponse response) throws IOException, InterruptedException{
         conexao.desconectaDroneSimulado();
     }
@@ -257,20 +311,6 @@ public class ProcessaRosod extends HttpServlet  {
     private void conectaRosod(int id_user,String porta, Rosod conexao, HttpServletResponse response) throws IOException, InterruptedException{
         //Conexao real também
         conexao.conectaDrone(porta);  
-    }   
-    
-    private void uploadMissaoRosod(int id_user,String caminho, Rosod conexao, HttpServletResponse response) throws IOException{
-        //Limpa pasta temporaria 
-            //////////////MUDAR O DIRETÓRIO CASO NECESSÁRIO//////////////
-        String ABSOLUTE_PATH_MISSAO = System.getProperty("user.home") + "/tempOD/"+id_user+"/";
-        File f = new File(ABSOLUTE_PATH_MISSAO);
-        if(f.exists()){
-            limpaPastaTemp(f);
-        }
-            
-        String filePath = null;        
-        filePath = "/tmp";
-        conexao.carregaMissao(caminho);
     }
     
     private void iniciaMissaoRosod(int id_user, Rosod conexao, HttpServletResponse response) throws IOException, InterruptedException{
@@ -281,6 +321,10 @@ public class ProcessaRosod extends HttpServlet  {
         conexao.controleDrone(request);
     }   
     
+    private void gerarNovaRota(int id_user, String request, Rosod conexao, HttpServletResponse response) throws IOException, InterruptedException{
+        conexao.novaRotaSimulado();
+    }
+
     private void desconectaRosod(int id_user, Rosod conexao, HttpServletResponse response) throws IOException, InterruptedException{
         conexao.desconectaDrone();
     }
