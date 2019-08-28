@@ -1,0 +1,81 @@
+Requisitos:
+	Ros
+	Pasta drone_ws com as funções na pasta /home/SEU-NOME/
+	Pasta com os Scripts no diretório /home/SEU-NOME/
+	QGroundControl dentro da pasta de Scripts
+	Netbeans Versão 8.2 ou superior (Usei a 8.2) *Usei o 8.2 pois tive problemas para configurar o netbeans 11.1 com o jdk 11 e 8 instalados na mesma máquina.
+	Tomcat (Usei a versão 8.5)
+	MySql server
+	MySql Workbench
+
+===
+
+Instalação Netbeans:
+	Só baixar o .sh no site deles e executar
+		https://netbeans.org/downloads/8.2/
+
+Instalação Tomcat: 
+	Baixar no site deles
+		https://tomcat.apache.org/download-80.cgi
+	Ir na pasta e extrair o tar.gz
+		tar -xvf apache-tomcat-8.5.43.tar.gz
+	Rodar um move para colocar o tomcat em outra pasta (e renomear)
+	No meu caso, deixei na pasta usr/share/tomcat
+		sudo mv apache-tomcat-8.5.43 /usr/share/tomcat
+
+
+Instalação MySql Server
+	Rodar o comando
+		sudo apt-get install mysql-server
+	*Importante anotar a senha de ROOT escolhida durante a instalação
+	*Caso o mysql não peça uma senha de root, rodar os seguintes comandos (a senha 'root' pode ser mudada para outra se desejar)
+		sudo mysql
+		ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';
+
+
+Instalação MySql Workbench
+	Rodar o comando
+		sudo apt-get install mysql-workbench
+
+
+===
+
+Configuração tomcat
+	Ir até a pasta com configuração de usuários
+		cd /usr/share/tomcat/conf/
+	Abrir o arquivo tomcat-users
+		sudo gedit tomcat-users.xml
+	Adicionar as linha de usuário mudando a senha e username
+		<role rolename="manager-gui"/>
+		<role rolename="manager-script"/>
+		<role rolename="manager-jmx"/>
+		<role rolename="manager-status"/>
+		<user password="SENHA" roles="manager-script,manager-jmx,manager-status,manager-gui" username="USERNAME"/> 
+			*Creio que são todos as permissões possíveis do tomcat, então deve se tomar cuidado para adicionar em outros usuários.
+
+
+Configuração Mysql Workbench
+	(Para localhost)
+	Criar nova conexão no ip local (127.0.0.1 na porta padrão 3306)
+	Usar o login e senha de root
+	
+	Abrir a conexão
+	Criar o schema do banco com nome 'od'
+	Criar as tabelas do outro arquivo (Tabelas OD.txt)
+
+Configuração Netbeans
+	Abrir o Netbeans
+	Ir na aba services -> Servers -> Botão Direito -> Add Server -> Apache Tomcat
+	Colocar a pasta do tomcat (/usr/share/tomcat) e o usuário criado
+	*Caso necessário, deixar ele instalar os plugins
+	*Quando compilar e rodar a aplicação pela primeira vez após ligar o computador/netbeans, é necessário fazer login novamente com o usuário do tomcat
+
+
+===
+
+
+Execução do Projeto
+	Quando compilar e executar pelo netbeans, ele irá abrir o navegador no endereço "localhost:8080/OD/", para testar é necessário entrar no endereço de IP LOCAL do computador, e todos os dispositivos que forem se conectar ao servidor DEVEM estar na mesma rede e entrar pelo IP LOCAL.
+	(Ex: 192.168.1.1:8080/OD/)
+
+
