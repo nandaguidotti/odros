@@ -77,7 +77,7 @@
                                    <option value="noporta" disabled selected>Selecione a Porta</option>
                                    <%
                                         String portaValue = null;
-                                        Process p = Runtime.getRuntime().exec("python -m serial.tools.list_ports");
+                                        Process p = Runtime.getRuntime().exec("python2.7 -m serial.tools.list_ports");
 
                                         BufferedReader stdInput = new BufferedReader(new 
                                         InputStreamReader(p.getInputStream()));
