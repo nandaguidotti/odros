@@ -4,7 +4,7 @@ Requisitos:
 	Pasta com os Scripts no diretório /home/SEU-NOME/
 	Pasta vazia com nome Missions no diretório /home/SEU-NOME/
 	Pasta vazia com nome ObsObj no diretório /home/SEU-NOME/
-	Python 3.6	
+	Python 2.7
 	QGroundControl dentro da pasta de Scripts
 	Netbeans Versão 8.2 ou superior (Usei a 8.2) *Usei o 8.2 pois tive problemas para configurar o netbeans 11.1 com o jdk 11 e 8 instalados na mesma máquina.
 	Tomcat (Usei a versão 8.5)
