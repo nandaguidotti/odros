@@ -1,7 +1,7 @@
 
 DROP TABLE IF EXISTS `user`;
 
-CREATE TABLE `user` (
+CREATE TABLE `user` (	
   `id_user` bigint(20) NOT NULL AUTO_INCREMENT,
   `name_user` varchar(45) NOT NULL,
   `email_user` varchar(45) NOT NULL,
@@ -16,8 +16,8 @@ DROP TABLE IF EXISTS `missions`;
 CREATE TABLE `missions` (
   `user_id_user` bigint(20) NOT NULL,
   `mission_name` varchar(45) NOT NULL,
-  `mission_point` varchar(45) NOT NULL,
-  PRIMARY KEY (`user_id_user`, `mission_name`, `mission_point`),
+  `mission_folder` varchar(45) NOT NULL,
+  PRIMARY KEY (`user_id_user`, `mission_name`),
   CONSTRAINT `fk_missions_user1` FOREIGN KEY (`user_id_user`) REFERENCES `user` (`id_user`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB AUTO_INCREMENT=52 DEFAULT CHARSET=utf8;
 
