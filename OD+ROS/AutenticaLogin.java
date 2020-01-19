@@ -40,6 +40,7 @@ public class AutenticaLogin extends HttpServlet {
         
         String tipoRequisicao = request.getParameter("tipoRequisicao");
         
+       // out.println("Nanda: " + tipoRequisicao);
         
         switch (tipoRequisicao){
             case "Login":

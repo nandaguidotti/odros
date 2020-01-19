@@ -36,14 +36,24 @@ public class Rosod {
     private Process carregaMissao;
     private Process iniciaMissao;
     private Process controleDrone;
+    private Process processoPlanner;
+    private Process novaRota;
+    private String scriptPath;
+    private String missionPath;
 
     public Rosod(){
         //Construtor vazio
+        String userHome = System.getProperty("user.home");
+        this.scriptPath = userHome + "/Scripts/";
+        this.missionPath = userHome + "/Missions/";        
     }
     
     public Rosod(String porta){
         //Construtor com o campo de porta preenchido
         this.porta_conexao = porta;
+        String userHome = System.getProperty("user.home");
+        this.scriptPath = userHome + "/Scripts/";
+        this.missionPath = userHome + "/Missions/";
     }
     
     
@@ -60,42 +70,69 @@ public class Rosod {
     //================ Métodos para voo simulado ================//
     public void conectaDroneSimulado() throws IOException, InterruptedException{
         //Outro caminho para o script pode ser usado
-        this.processoPx4 = Runtime.getRuntime().exec("/home/claudio/Scripts/scriptConectarPx4.sh");
-        this.processoRoslaunch = Runtime.getRuntime().exec("/home/claudio/Scripts/scriptConectarRoslaunch.sh ");
-        this.processoQGround = Runtime.getRuntime().exec("/home/claudio/Scripts/QGroundControl.AppImage ");
+        this.processoPx4 = Runtime.getRuntime().exec(this.scriptPath + "scriptConectarPx4.sh");
+        this.processoRoslaunch = Runtime.getRuntime().exec(this.scriptPath + "scriptConectarRoslaunch.sh");
+        this.processoQGround = Runtime.getRuntime().exec(this.scriptPath + "QGroundControl.AppImage");
+    
+        //ProcessBuilder processBuilder = new ProcessBuilder();
+        //processBuilder.command("bash", "-c", "cd /home/claudio/src/Firmware/ && export PX4_HOME_LAT=-22.002178 && export PX4_HOME_LON=-47.932588 && export PX4_HOME_ALT=847.142652 && export NAV_RCL_ACT=0 && make px4_sitl jmavsim");
+        //processBuilder.command("bash", "-c", "source /home/claudio/drone_ws/devel/setup.bash");
+        //processBuilder.command("bash", "-c", "/opt/ros/melodic/bin/roslaunch mavros px4.launch fcu_url:=\"udp://:14540@127.0.0.1:14557\"");
+        //processBuilder.command("bash", "-c", "/home/claudio/Scripts/QGroundControl.AppImage");
     }
     
     public void carregaMissaoSimulado(String caminho) throws IOException{
         System.out.println("CarregaMissaoSimulado: " + caminho);
-        this.carregaMissao = Runtime.getRuntime().exec("/home/claudio/Scripts/scriptUploadMissao.sh " + caminho);
+        this.carregaMissao = Runtime.getRuntime().exec(this.scriptPath + "scriptUploadMissao.sh " + caminho);
     }
     
     //Função para iniciar a missão
     public void iniciaMissaoSimulado() throws IOException{
-        this.iniciaMissao = Runtime.getRuntime().exec("/home/claudio/Scripts/scriptIniciaMissao.sh");
+        //this.iniciaMissao = Runtime.getRuntime().exec(this.scriptPath + "scriptIniciaMissao.sh");
+        this.controleDrone = Runtime.getRuntime().exec(this.scriptPath + "scriptArm.sh");
+        this.controleDrone = Runtime.getRuntime().exec(this.scriptPath + "scriptAutoSimulado.sh");
     }
     
     public void controleDroneSimulado(String tipo) throws IOException{
         switch(tipo){
             case "arm_rosod":
-                this.controleDrone = Runtime.getRuntime().exec("/home/claudio/Scripts/scriptArm.sh");
+                this.controleDrone = Runtime.getRuntime().exec(this.scriptPath + "scriptArm.sh");
             break;
             case "takeoff_rosod":
-                this.controleDrone = Runtime.getRuntime().exec("/home/claudio/Scripts/scriptTakeoff.sh");                
+                this.controleDrone = Runtime.getRuntime().exec(this.scriptPath + "scriptArm.sh");
+                this.controleDrone = Runtime.getRuntime().exec(this.scriptPath + "scriptTakeoff.sh");                
             break;
             case "land_rosod":
-                this.controleDrone = Runtime.getRuntime().exec("/home/claudio/Scripts/scriptLand.sh");
+                this.controleDrone = Runtime.getRuntime().exec(this.scriptPath + "scriptLand.sh");
             break;
             case "auto_rosod":
-                this.controleDrone = Runtime.getRuntime().exec("/home/claudio/Scripts/scriptAuto.sh");
+                this.controleDrone = Runtime.getRuntime().exec(this.scriptPath + "scriptAutoSimulado.sh");
             break;
             case "loiter_rosod":
-                this.controleDrone = Runtime.getRuntime().exec("/home/claudio/Scripts/scriptLoiter.sh");
+                this.controleDrone = Runtime.getRuntime().exec(this.scriptPath + "scriptLoiterSimulado.sh");
             break;
             default:
                 System.out.println("NÃO ENCONTRADO CONTROLE SIMULADO: " + tipo);
             break;
         }
+    }
+    
+    public void novaRotaSimulado(String planner) throws IOException{
+        if(planner.equals("estat")){
+            this.processoPlanner = Runtime.getRuntime().exec(this.scriptPath + "scriptRotaServerEstat.sh");
+            this.novaRota = Runtime.getRuntime().exec(this.scriptPath + "scriptGerarNovaRotaEstat.sh ");
+        }else if(planner.equals("genet")){
+            this.processoPlanner = Runtime.getRuntime().exec(this.scriptPath + "scriptRotaServerGenet.sh");
+            this.novaRota = Runtime.getRuntime().exec(this.scriptPath + "scriptGerarNovaRotaGenet.sh ");
+        }
+    }
+    
+    public void missaoAgoraSimulado(){
+        //TO DO
+    }
+    
+    public void missaoFinalSimulado(){
+        //TO DO
     }
     
     //Função para matar o processo
@@ -107,41 +144,62 @@ public class Rosod {
     //Função para conectar
     public void conectaDrone(String porta) throws IOException, InterruptedException{
         //Outro caminho para o script pode ser usado
-        this.processoRoslaunch = Runtime.getRuntime().exec("/home/claudio/Scripts/scriptConectarRoslaunchReal.sh " + porta);
-        this.processoQGround = Runtime.getRuntime().exec("/home/claudio/Scripts/QGroundControl.AppImage ");
+        this.processoRoslaunch = Runtime.getRuntime().exec(this.scriptPath + "scriptConectarRoslaunchReal.sh " + porta);
+        this.processoPlanner = Runtime.getRuntime().exec(this.scriptPath + "scriptRotaServer.sh");
     }
     
     //Função para iniciar a missão
     public void iniciaMissao() throws IOException{
-        this.iniciaMissao = Runtime.getRuntime().exec("/home/claudio/Scripts/scriptIniciaMissaoReal.sh");
+        //this.iniciaMissao = Runtime.getRuntime().exec(this.scriptPath + "scriptIniciaMissaoReal.sh");
+        this.controleDrone = Runtime.getRuntime().exec(this.scriptPath + "scriptArm.sh");
+        this.controleDrone = Runtime.getRuntime().exec(this.scriptPath + "scriptAuto.sh");
     }
     
     public void carregaMissao(String caminho) throws IOException{
         System.out.println("CarregaMissaoReal: " + caminho);
-        this.carregaMissao = Runtime.getRuntime().exec("/home/claudio/Scripts/scriptUploadMissao.sh " + caminho);
+        this.carregaMissao = Runtime.getRuntime().exec(this.scriptPath + "scriptUploadMissao.sh " + caminho);
+    }
+    
+    public void novaRota(String planner) throws IOException{
+        if(planner.equals("estat")){
+            this.processoPlanner = Runtime.getRuntime().exec(this.scriptPath + "scriptRotaServerEstat.sh");
+            this.novaRota = Runtime.getRuntime().exec(this.scriptPath + "scriptGerarNovaRotaEstat.sh ");
+        }else if(planner.equals("genet")){
+            this.processoPlanner = Runtime.getRuntime().exec(this.scriptPath + "scriptRotaServerGenet.sh");
+            this.novaRota = Runtime.getRuntime().exec(this.scriptPath + "scriptGerarNovaRotaGenet.sh ");
+        }
     }
     
     public void controleDrone(String tipo) throws IOException{
         switch(tipo){
             case "arm_rosod":
-                this.controleDrone = Runtime.getRuntime().exec("/home/claudio/Scripts/scriptArm.sh");
+                this.controleDrone = Runtime.getRuntime().exec(this.scriptPath + "scriptArm.sh");
             break;
             case "takeoff_rosod":
-                this.controleDrone = Runtime.getRuntime().exec("/home/claudio/Scripts/scriptTakeoff.sh");                
+                this.controleDrone = Runtime.getRuntime().exec(this.scriptPath + "scriptArm.sh");
+                this.controleDrone = Runtime.getRuntime().exec(this.scriptPath + "scriptTakeoff.sh");                
             break;
             case "land_rosod":
-                this.controleDrone = Runtime.getRuntime().exec("/home/claudio/Scripts/scriptLand.sh");
+                this.controleDrone = Runtime.getRuntime().exec(this.scriptPath + "scriptLand.sh");
             break;
             case "auto_rosod":
-                this.controleDrone = Runtime.getRuntime().exec("/home/claudio/Scripts/scriptAuto.sh");
+                this.controleDrone = Runtime.getRuntime().exec(this.scriptPath + "scriptAuto.sh");
             break;
             case "loiter_rosod":
-                this.controleDrone = Runtime.getRuntime().exec("/home/claudio/Scripts/scriptLoiter.sh");
+                this.controleDrone = Runtime.getRuntime().exec(this.scriptPath + "scriptLoiter.sh");
             break;
             default:
                 System.out.println("NÃO ENCONTRADO CONTROLE REAL: " + tipo);
             break;
         }
+    }
+    
+    public void missaoAgora(){
+        //TO DO
+    }
+    
+    public void missaoFinal(){
+        //TO DO
     }
     //Função para matar o processo
     public void desconectaDrone(){

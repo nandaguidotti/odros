@@ -60,6 +60,7 @@ public class CadastrarRota extends HttpServlet {
         Usuario usuario = new Usuario();
         if(sessao.getAttribute("usuario") == null){
            //request.getRequestDispatcher("index.jsp").forward(request, response);
+            System.err.println("DEU PT bem aqui!!!!!");
         }else{
             usuario =  (Usuario) sessao.getAttribute("usuario");
         }
@@ -78,8 +79,12 @@ public class CadastrarRota extends HttpServlet {
                 
     Logidrone logidrone = new Logidrone();        
     String filePath  = null;
+    //filePath = "C:\\Users\\User\\Documents\\NetBeansProjects\\OD\\web\\upload_logs\\"; 
+
+    //filePath = "C:\\Windows\\Temp\\";
     filePath = "/tmp";
-    
+    ///home/vinicius/Documents/Newfolder/OD/build/web/uploadcsv
+
 
     DiskFileItemFactory factory = new DiskFileItemFactory();
     factory.setSizeThreshold(4096);
@@ -100,7 +105,9 @@ public class CadastrarRota extends HttpServlet {
                     String valueNameRota = item.getString();
                     rota.setName_routeidrone(valueNameRota); // Aqui peguei o nome da Rota
                     rota.cadastroRota(id_user); // Insere a Rota
-                    }
+                    //System.out.println("Fernanda: " + valueNameRota);
+                    //System.out.println("Fernanda: " + value);
+            }
         // Process a file upload
         if (!item.isFormField()){
                     String fileName = item.getName();                       
@@ -119,7 +126,8 @@ public class CadastrarRota extends HttpServlet {
         out.close();
         
     
-             
+        //request.getRequestDispatcher("cadastro_rota.jsp").forward(request, response);
+             //request.getRequestDispatcher("").forward(request, response);     
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
