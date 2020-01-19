@@ -17,14 +17,22 @@ public class MysqlDB {
 	status = false;
     }
     public MysqlDB(){
-	host = "jdbc:mysql://"+host+":3306/"+nomeBD;//+"?user="+user+"&password="+pwd;
-	status=false;
+        host = "jdbc:mysql://"+host+":3306/"+nomeBD; //MySQL
+//	host = "jdbc:mysql://"+host+":3306/"+nomeBD+"?user="+user+"&password="+pwd; //MariaDB
+//	host = "jdbc:mariadb://"+host+":3306/"+nomeBD+"?user="+user+"&password="+pwd; //MariaDB
+
+        status=false;
     }
     public void connect() throws SQLException{ 
         try {   
-            Class.forName("com.mysql.jdbc.Driver");
-            conn = DriverManager.getConnection( host,user,pwd );
-	    status=true;
+        //MySQL
+           Class.forName("com.mysql.jdbc.Driver");
+           conn = DriverManager.getConnection( host,user,pwd );
+	//MariaDB
+            //  Class.forName("org.mariadb.jdbc.Driver");
+            conn = DriverManager.getConnection(host);
+        //------//
+            status=true;
 	    //System.out.println("A conexão foi um sucesso");
 	} catch (ClassNotFoundException e) {
             

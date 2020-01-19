@@ -64,7 +64,9 @@ public class UploadServlet extends HttpServlet {
 			if (item.isFormField()) {
 				String name =  item.getFieldName();
 				String value = item.getString();
-				}
+				System.out.println("Nanda: " + name);
+				System.out.println("Nanda: " + value);
+			}
 		   // Process a file upload
 		   if (!item.isFormField()) {
 			String fileName = item.getName();						

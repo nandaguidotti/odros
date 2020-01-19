@@ -1,6 +1,6 @@
 #!/bin/bash
-printf '1' | /home/claudio/Scripts/scriptActions.sh & PID=$!
-sleep 5
-kill $PID
+
+source /home/claudio/drone_ws/devel/setup.bash
+/opt/ros/melodic/bin/rosrun actions ARM
 
 #Matheus Vinicius G de Godoi
